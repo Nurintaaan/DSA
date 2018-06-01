@@ -17,12 +17,24 @@ class Car:
         self.height = height
 
 
+    def setTime(self, time):
+        self.time = time
+
+
+    def getTime(self):
+        return self.time
+
+
+    def addTime(self):
+        self.time += 1
+
+
     def retrieve(self):
         return self.x, self.y, self.width, self.height
 
 
-cap = cv2.VideoCapture('inputs/1300/UI_Pengambilan2_01.avi')
-# cap = cv2.VideoCapture('inputs/1700/UI_Conv_P2_06.avi')
+# cap = cv2.VideoCapture('inputs/1300/UI_Pengambilan2_01.avi')
+cap = cv2.VideoCapture('inputs/1700/UI_Conv_P2_06.avi')
 # cap = cv2.VideoCapture('inputs/2100/00025_1.mp4')
 
 fbg = cv2.bgsegm.createBackgroundSubtractorMOG()
@@ -43,11 +55,15 @@ mask[100:140,176:182] = 0
 CONTOUR_WIDTH = 30
 CONTOUR_HEIGHT = 30
 LINE_THICKNESS = 1
+TRAFFIC_TIME_THRESHOLD = 50
+TRAFFIC_CAR_THRESHOLD = 5
 
 DISTANCE = 5
 
 objects = {}
 counter = 0
+currentTime = 0
+currentCar = 0
 
 while (True):
     ret, frame = cap.read()
@@ -55,8 +71,8 @@ while (True):
     kernel = np.ones((5, 5), np.uint8)
     # background = fbg.getBackgroundImage(frame)
 
-    img_dilation = cv2.dilate(fmask, kernel, iterations=2)
-    img_erosion = cv2.erode(img_dilation, kernel, iterations=3)
+    img_dilatation = cv2.dilate(fmask, kernel, iterations=2)
+    img_erosion = cv2.erode(img_dilatation, kernel, iterations=3)
 
     img_final = img_erosion
 
@@ -85,14 +101,23 @@ while (True):
 
             if (isRegistered):
                 # print(locatedAt + str(objects.get(locatedAt)))
-                objects.pop(locatedAt)
+                car = objects.pop(locatedAt)
+                car.update(x, y, width, height)
+                car.addTime()
+                currentTime = car.getTime()
+                # print("Traffic indicator: " + str(currentTime))
+                currentCar = len(objects)
+                if (currentTime > TRAFFIC_TIME_THRESHOLD and currentCar > TRAFFIC_CAR_THRESHOLD):
+                    print("Traffic Jam Alert!")
                 # print("Updating car at " + locatedAt)
-                objects[str(y)] = Car(x, y, width, height)
+                objects[str(y)] = car
             else:
                 counter += 1
-                objects[str(y)] = Car(x, y, width, height)
-                print("New car added! Total= " + str(counter))
-                print("x={:d}, y={:d}, w={:d}, h={:d}".format(x, y, width, height))
+                car = Car(x, y, width, height)
+                car.setTime(1)
+                objects[str(y)] = car
+                # print("New car added! Total= " + str(counter))
+                # print("x={:d}, y={:d}, w={:d}, h={:d}".format(x, y, width, height))
 
             cv2.rectangle(frame, (x, y), (x + width - 1, y + height - 1), (255, 255, 255), LINE_THICKNESS)
 
