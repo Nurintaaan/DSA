@@ -107,8 +107,6 @@ while (True):
                 currentTime = car.getTime()
                 # print("Traffic indicator: " + str(currentTime))
                 currentCar = len(objects)
-                if (currentTime > TRAFFIC_TIME_THRESHOLD and currentCar > TRAFFIC_CAR_THRESHOLD):
-                    print("Traffic Jam Alert!")
                 # print("Updating car at " + locatedAt)
                 objects[str(y)] = car
             else:
@@ -120,6 +118,12 @@ while (True):
                 # print("x={:d}, y={:d}, w={:d}, h={:d}".format(x, y, width, height))
 
             cv2.rectangle(frame, (x, y), (x + width - 1, y + height - 1), (255, 255, 255), LINE_THICKNESS)
+
+    if (currentTime > TRAFFIC_TIME_THRESHOLD and currentCar > TRAFFIC_CAR_THRESHOLD):
+        for key, value in objects.items():
+            value.setTime(0)
+        currentTime = 0
+        print("Traffic Jam Alert!")
 
     cv2.imshow('frame', frame)
     # cv2.imshow('subtraction', img_final)
