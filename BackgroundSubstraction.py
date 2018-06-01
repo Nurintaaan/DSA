@@ -33,12 +33,12 @@ class Car:
         return self.x, self.y, self.width, self.height
 
 
-# cap = cv2.VideoCapture('inputs/1300/UI_Pengambilan2_01.avi')
-cap = cv2.VideoCapture('inputs/1700/UI_Conv_P2_06.avi')
+cap = cv2.VideoCapture('inputs/1300/UI_Pengambilan2_01.avi')
+# cap = cv2.VideoCapture('inputs/1700/UI_Conv_P2_06.avi')
 # cap = cv2.VideoCapture('inputs/2100/00025_1.mp4')
 
-fbg = cv2.bgsegm.createBackgroundSubtractorMOG()
-# fbg = cv2.createBackgroundSubtractorMOG2()
+# fbg = cv2.bgsegm.createBackgroundSubtractorMOG()
+fbg = cv2.createBackgroundSubtractorMOG2()
 
 # get frame size
 frame_w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -114,8 +114,8 @@ while (True):
                 car = Car(x, y, width, height)
                 car.setTime(1)
                 objects[str(y)] = car
-                # print("New car added! Total= " + str(counter))
-                # print("x={:d}, y={:d}, w={:d}, h={:d}".format(x, y, width, height))
+                print("New car added! Total= " + str(counter))
+                print("x={:d}, y={:d}, w={:d}, h={:d}".format(x, y, width, height))
 
             cv2.rectangle(frame, (x, y), (x + width - 1, y + height - 1), (255, 255, 255), LINE_THICKNESS)
 
@@ -125,6 +125,9 @@ while (True):
         currentTime = 0
         print("Traffic Jam Alert!")
 
+
+    cv2.putText(frame, ("Vehicle counted: %02d" % counter), (12, 56)
+                , cv2.FONT_HERSHEY_PLAIN, 1, (127,255, 255), 2)
     cv2.imshow('frame', frame)
     # cv2.imshow('subtraction', img_final)
     # cv2.imshow('frame', background)
